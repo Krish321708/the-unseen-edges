@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vesper Halcyon — Design Engineer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0908;
+    --bg-2:#131110;
+    --fg:#f1e9d8;
+    --fg-dim:#a39885;
+    --fg-mute:#5a5247;
+    --accent:#d9a441;
+    --accent-2:#c2410c;
+    --wine:#3a0e12;
+    --border:rgba(241,233,216,.1);
+    --border-strong:rgba(241,233,216,.2);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Space Grotesk',sans-serif;
+    overflow-x:hidden;
+    cursor:none;
+    -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.05;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  body::after{
+    content:'';position:fixed;inset:0;pointer-events:none;z-index:2;
+    background:radial-gradient(ellipse at center,transparent 0%,transparent 60%,rgba(10,9,8,.6) 100%);
+  }
+
+  /* Cursor */
+  .cursor{position:fixed;top:0;left:0;width:6px;height:6px;background:var(--fg);border-radius:50%;pointer-events:none;z-index:9999;transition:width .3s,height .3s,opacity .3s;mix-blend-mode:difference;will-change:transform}
+  .cursor-ring{position:fixed;top:0;left:0;width:36px;height:36px;border:1px solid var(--fg);border-radius:50%;pointer-events:none;z-index:9998;transition:width .4s cubic-bezier(.16,1,.3,1),height .4s cubic-bezier(.16,1,.3,1),opacity .3s;mix-blend-mode:difference;will-change:transform}
+  .cursor.hover{width:0;height:0}
+  .cursor-ring.hover{width:80px;height:80px}
+
+  /* Nav */
+  nav{position:fixed;top:0;left:0;right:0;padding:28px 48px;display:flex;justify-content:space-between;align-items:center;z-index:100;mix-blend-mode:difference}
+  .nav-logo{font-family:'Fraunces',serif;font-size:22px;font-weight:400;letter-spacing:-.02em;color:var(--fg)}
+  .nav-logo em{font-style:italic;color:var(--accent)}
+  .nav-meta{display:flex;gap:32px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-dim)}
+  .nav-meta .live{display:flex;align-items:center;gap:8px}
+  .nav-meta .live::before{content:'';width:6px;height:6px;background:#84cc16;border-radius:50%;animation:pulse 2s ease-in-out infinite;box-shadow:0 0 8px #84cc16}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+  /* Hero */
+  .hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:0 48px;overflow:hidden}
+  .hero-canvas{position:absolute;inset:0;z-index:0;opacity:.7}
+  .hero-vignette{position:absolute;inset:0;z-index:1;background:radial-gradient(ellipse at 30% 50%,rgba(217,164,65,.08) 0%,transparent 50%),linear-gradient(to bottom,rgba(10,9,8,.4) 0%,transparent 30%,transparent 70%,rgba(10,9,8,.8) 100%);pointer-events:none}
+  .hero-content{position:relative;z-index:3;max-width:1400px;margin:0 auto;width:100%}
+  .hero-eyebrow{font-size:12px;letter-spacing:.25em;text-transform:uppercase;color:var(--accent);margin-bottom:40px;display:flex;align-items:center;gap:16px;animation:fadeUp 1s ease .1s both}
+  .hero-eyebrow::before{content:'';width:48px;height:1px;background:var(--accent)}
+  .hero-title{font-family:'Fraunces',serif;font-size:clamp(64px,13vw,210px);font-weight:300;line-height:.92;letter-spacing:-.045em;margin-bottom:0;animation:heroReveal 1.4s cubic-bezier(.16,1,.3,1) .3s both}
+  .hero-title .italic{font-style:italic;font-weight:400;color:var(--accent)}
+  @keyframes heroReveal{0%{opacity:0;transform:translateY(60px);filter:blur(12px)}100%{opacity:1;transform:translateY(0);filter:blur(0)}}
+  @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+  .hero-sub{display:grid;grid-template-columns:1fr 1fr;gap:80px;margin-top:72px;align-items:end;animation:fadeUp 1s ease .8s both}
+  .hero-tagline{font-size:17px;line-height:1.6;color:var(--fg-dim);max-width:460px}
+  .hero-tagline strong{color:var(--fg);font-weight:500}
+  .hero-cta{display:flex;gap:16px;align-items:center;justify-self:end;flex-wrap:wrap}
+  .btn{display:inline-flex;align-items:center;gap:12px;padding:18px 30px;font-family:inherit;font-size:12px;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;color:var(--bg);background:var(--fg);border:none;border-radius:100px;cursor:none;transition:transform .5s cubic-bezier(.16,1,.3,1),background .3s,color .3s;font-weight:500}
+  .btn:hover{transform:translateY(-2px);background:var(--accent);color:var(--bg)}
+  .btn .arr{transition:transform .4s cubic-bezier(.16,1,.3,1)}
+  .btn:hover .arr{transform:translateX(4px)}
+  .btn-ghost{background:transparent;color:var(--fg);border:1px solid var(--border-strong)}
+  .btn-ghost:hover{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+  .scroll-ind{position:absolute;bottom:32px;left:50%;transform:translateX(-50%);font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--fg-mute);display:flex;flex-direction:column;align-items:center;gap:14px;z-index:3;animation:fadeUp 1s ease 1.3s both}
+  .scroll-ind::after{content:'';width:1px;height:48px;background:linear-gradient(to bottom,var(--fg-mute),transparent);animation:scrollLine 2.4s ease-in-out infinite}
+  @keyframes scrollLine{0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
+
+  /* Sections */
+  section{position:relative;padding:160px 48px;z-index:3}
+  .container{max-width:1400px;margin:0 auto}
+  .section-label{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--fg-mute);margin-bottom:80px;display:flex;align-items:center;gap:16px}
+  .section-label::before{content:'';width:32px;height:1px;background:var(--fg-mute)}
+  .section-label .num{color:var(--accent);font-family:'Fraunces',serif;font-style:italic;font-size:14px;letter-spacing:0}
+
+  /* About */
+  .about-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:100px;align-items:start}
+  .about-text{font-family:'Fraunces',serif;font-size:clamp(28px,2.8vw,44px);font-weight:300;line-height:1.2;letter-spacing:-.02em}
+  .about-text em{font-style:italic;color:var(--accent)}
+  .about-details{display:grid;gap:44px;padding-top:8px}
+  .about-detail h4{font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:var(--fg-mute);margin-bottom:14px;font-weight:500;display:flex;align-items:center;gap:10px}
+  .about-detail h4::before{content:'';width:16px;height:1px;background:var(--fg-mute)}
+  .about-detail p{font-size:15px;line-height:1.7;color:var(--fg-dim)}
+  .about-detail p strong{color:var(--fg);font-weight:500}
+
+  /* Marquee */
+  .marquee{padding:100px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);overflow:hidden;white-space:nowrap;position:relative;z-index:3;background:var(--bg)}
+  .marquee-track{display:inline-flex;gap:80px;animation:marqueeMove 38s linear infinite;align-items:center}
+  .marquee-item{font-family:'Fraunces',serif;font-size:clamp(48px,7vw,104px);font-weight:300;letter-spacing:-.03em;color:var(--fg);display:inline-flex;align-items:center;gap:80px;flex-shrink:0}
+  .marquee-item em{font-style:italic;color:var(--accent)}
+  .marquee-item::after{content:'✦';font-size:.4em;color:var(--accent);font-style:normal}
+  @keyframes marqueeMove{to{transform:translateX(-50%)}}
+
+  /* Work */
+  .work-list{display:flex;flex-direction:column}
+  .work-item{position:relative;padding:52px 0;border-top:1px solid var(--border);display:grid;grid-template-columns:60px 1.4fr 1fr 100px;gap:48px;align-items:center;cursor:none;transition:padding .6s cubic-bezier(.16,1,.3,1)}
+  .work-item:last-child{border-bottom:1px solid var(--border)}
+  .work-item:hover{padding:72px 0}
+  .work-item::before{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(217,164,65,.04),transparent);opacity:0;transition:opacity .6s}
+  .work-item:hover::before{opacity:1}
+  .work-num{font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:var(--fg-mute);position:relative;z-index:1}
+  .work-title{font-family:'Fraunces',serif;font-size:clamp(32px,4vw,56px);font-weight:300;line-height:1;letter-spacing:-.025em;transition:transform .6s cubic-bezier(.16,1,.3,1),color .4s;position:relative;z-index:1}
+  .work-item:hover .work-title{color:var(--accent);transform:translateX(24px)}
+  .work-title em{font-style:italic}
+  .work-tags{display:flex;flex-wrap:wrap;gap:6px;position:relative;z-index:1}
+  .work-tag{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-dim);padding:6px 12px;border:1px solid var(--border);border-radius:100px;transition:border-color .3s,color .3s}
+  .work-item:hover .work-tag{border-color:var(--border-strong);color:var(--fg)}
+  .work-year{font-family:'Fraunces',serif;font-style:italic;font-size:18px;color:var(--fg-dim);text-align:right;position:relative;z-index:1}
+
+  .work-preview{position:fixed;pointer-events:none;width:300px;height:380px;z-index:50;opacity:0;transform:translate(-50%,-50%) scale(.85);transition:opacity .5s ease,transform .6s cubic-bezier(.16,1,.3,1);overflow:hidden;border-radius:2px;will-change:transform,left,top}
+  .work-preview.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  .work-preview img{width:100%;height:100%;object-fit:cover;filter:grayscale(15%) contrast(1.05)}
+  .work-preview::after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 0 1px rgba(241,233,216,.15);pointer-events:none}
+
+  /* Capabilities */
+  .cap-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:80px 64px}
+  .cap-item{padding-top:28px;border-top:1px solid var(--border);position:relative}
+  .cap-item::before{content:'';position:absolute;top:-1px;left:0;width:0;height:1px;background:var(--accent);transition:width .8s cubic-bezier(.16,1,.3,1)}
+  .cap-item:hover::before{width:100%}
+  .cap-num{font-family:'Fraunces',serif;font-style:italic;font-size:13px;color:var(--accent);margin-bottom:20px}
+  .cap-title{font-family:'Fraunces',serif;font-size:32px;font-weight:300;letter-spacing:-.02em;margin-bottom:18px;line-height:1.1}
+  .cap-title em{font-style:italic;color:var(--accent)}
+  .cap-desc{font-size:15px;line-height:1.65;color:var(--fg-dim);max-width:460px}
+  .cap-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:24px}
+  .cap-tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--fg-mute);padding:5px 11px;border:1px solid var(--border);border-radius:100px}
+
+  /* Recognition */
+  .recog-list{display:flex;flex-direction:column}
+  .recog-item{display:grid;grid-template-columns:80px 1.2fr 1fr 120px;gap:48px;padding:28px 0;border-top:1px solid var(--border);align-items:baseline;transition:padding .4s,background .3s}
+  .recog-item:last-child{border-bottom:1px solid var(--border)}
+  .recog-item:hover{padding-left:16px;background:rgba(217,164,65,.025)}
+  .recog-year{font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--accent)}
+  .recog-title{font-family:'Fraunces',serif;font-size:22px;font-weight:400;line-height:1.2}
+  .recog-title em{font-style:italic}
+  .recog-org{font-size:13px;color:var(--fg-dim);letter-spacing:.02em}
+  .recog-cat{font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:var(--fg-mute);text-align:right}
+
+  /* Currently */
+  .currently{padding:120px 48px;border-top:1px solid var(--border)}
+  .currently-grid{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:1fr 2fr;gap:80px;align-items:start}
+  .currently-label{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--fg-mute);display:flex;align-items:center;gap:16px}
+  .currently-label::before{content:'';width:32px;height:1px;background:var(--fg-mute)}
+  .currently-list{display:grid;gap:32px}
+  .currently-row{display:grid;grid-template-columns:140px 1fr;gap:32px;padding-bottom:24px;border-bottom:1px solid var(--border);align-items:baseline}
+  .currently-row:last-child{border-bottom:none}
+  .currently-key{font-family:'Fraunces',serif;font-style:italic;font-size:14px;color:var(--fg-mute)}
+  .currently-val{font-size:18px;color:var(--fg);line-height:1.4}
+  .currently-val em{font-style:italic;color:var(--accent)}
+
+  /* Contact */
+  .contact{text-align:center;padding:200px 48px 160px;position:relative;overflow:hidden}
+  .contact::before{content:'';position:absolute;top:50%;left:50%;width:120vw;height:120vw;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(217,164,65,.06) 0%,transparent 40%);pointer-events:none}
+  .contact-eyebrow{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--accent);margin-bottom:48px;position:relative}
+  .contact-title{font-family:'Fraunces',serif;font-size:clamp(60px,12vw,180px);font-weight:300;line-height:.95;letter-spacing:-.045em;margin-bottom:80px;position:relative}
+  .contact-title em{font-style:italic;color:var(--accent)}
+  .contact-email{display:inline-flex;align-items:center;gap:16px;font-family:'Fraunces',serif;font-size:clamp(22px,2.6vw,36px);font-style:italic;color:var(--fg);text-decoration:none;padding:16px 0;border-bottom:1px solid var(--border-strong);transition:border-color .4s,color .4s;position:relative}
+  .contact-email:hover{border-color:var(--accent);color:var(--accent)}
+  .contact-email::after{content:'→';transition:transform .5s cubic-bezier(.16,1,.3,1);font-style:normal}
+  .contact-email:hover::after{transform:translateX(12px)}
+
+  /* Footer */
+  footer{padding:48px;border-top:1px solid var(--border);display:grid;grid-template-columns:1.5fr 1fr 1fr;gap:48px;font-size:13px;color:var(--fg-mute);position:relative;z-index:3}
+  footer a{color:var(--fg-dim);text-decoration:none;transition:color .3s;cursor:none}
+  footer a:hover{color:var(--accent)}
+  .footer-col h5{color:var(--fg);font-size:10px;letter-spacing:.25em;text-transform:uppercase;margin-bottom:18px;font-weight:500}
+  .footer-col ul{list-style:none;display:grid;gap:8px}
+  .footer-col p{line-height:1.6;color:var(--fg-dim);max-width:300px}
+  .footer-bottom{grid-column:1 / -1;padding-top:32px;margin-top:16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+  .footer-bottom .clock{font-family:'Fraunces',serif;font-style:italic;color:var(--fg-dim);font-size:14px}
+  .footer-bottom .clock span{color:var(--accent)}
+
+  /* Reveal */
+  .reveal{opacity:0;transform:translateY(40px);transition:opacity 1.1s cubic-bezier(.16,1,.3,1),transform 1.1s cubic-bezier(.16,1,.3,1)}
+  .reveal.visible{opacity:1;transform:translateY(0)}
+
+  /* Selection */
+  ::selection{background:var(--accent);color:var(--bg)}
+
+  /* Responsive */
+  @media (max-width:960px){
+    nav{padding:20px 24px}
+    .nav-meta{gap:16px;font-size:10px}
+    .nav-meta span:last-child{display:none}
+    .hero{padding:0 24px}
+    section{padding:100px 24px}
+    .currently{padding:80px 24px}
+    .hero-sub{grid-template-columns:1fr;gap:40px}
+    .hero-cta{justify-self:start}
+    .about-grid{grid-template-columns:1fr;gap:48px}
+    .work-item{grid-template-columns:40px 1fr;gap:16px;padding:32px 0}
+    .work-item:hover{padding:40px 0}
+    .work-tags,.work-year{display:none}
+    .cap-grid{grid-template-columns:1fr;gap:48px}
+    .recog-item{grid-template-columns:60px 1fr;gap:16px}
+    .recog-org,.recog-cat{display:none}
+    .currently-grid{grid-template-columns:1fr;gap:40px}
+    .currently-row{grid-template-columns:1fr;gap:8px}
+    footer{grid-template-columns:1fr;padding:32px 24px}
+    .footer-bottom{flex-direction:column;align-items:flex-start}
+    body{cursor:auto}
+    .cursor,.cursor-ring,.work-preview{display:none}
+    .btn{cursor:pointer}
+    a,button{cursor:pointer}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<div class="work-preview" id="workPreview">
+  <img src="" alt="" id="previewImg">
+</div>
+
+<nav>
+  <div class="nav-logo">Vesper<em>·</em>Halcyon</div>
+  <div class="nav-meta">
+    <span class="live">Available Q2 2025</span>
+    <span>Brooklyn · Tokyo</span>
+  </div>
+</nav>
+
+<section class="hero">
+  <canvas class="hero-canvas" id="flowCanvas"></canvas>
+  <div class="hero-vignette"></div>
+  <div class="hero-content">
+    <div class="hero-eyebrow">Design Engineer · Independent Practice · Est. 2018</div>
+    <h1 class="hero-title">
+      Crafting the<br>
+      <span class="italic">unseen</span> edges<br>
+      of digital craft.
+    </h1>
+    <div class="hero-sub">
+      <p class="hero-tagline">
+        A solo studio at the intersection of <strong>interface engineering</strong>, motion systems, and computational typography. Recent collaborations with <strong>Linear</strong>, <strong>Arc</strong>, <strong>Vercel</strong>, and founders worldwide.
+      </p>
+      <div class="hero-cta">
+        <a href="#work" class="btn">Selected Work <span class="arr">→</span></a>
+        <a href="#contact" class="btn btn-ghost">Begin a Project</a>
+      </div>
+    </div>
+  </div>
+  <div class="scroll-ind">Scroll</div>
+</section>
+
+<section id="about">
+  <div class="container">
+    <div class="section-label"><span class="num">01</span> Practice</div>
+    <div class="about-grid">
+      <div class="about-text reveal">
+        I build interfaces that feel <em>inevitable</em> — products where every transition, every easing curve, every typographic choice has been considered, then considered again. The work lives in the millimeters between design and code.
+      </div>
+      <div class="about-details">
+        <div class="about-detail reveal">
+          <h4>Approach</h4>
+          <p>Eight years deep in production interface engineering. I write the code, draw the curves, tune the easing. No handoffs, no lossy translation between design and build. The person who decides is the person who ships.</p>
+        </div>
+        <div class="about-detail reveal">
+          <h4>Engagement</h4>
+          <p>One project at a time, fully embedded. Typical engagements run <strong>6–14 weeks</strong>. I take on four to five clients per year. Capacity opens May 2025 — two slots remaining.</p>
+        </div>
+        <div class="about-detail reveal">
+          <h4>Recognition</h4>
+          <p>Awwwards SOTD ×7, FWA ×3, Communication Arts Interactive Annual, Type Directors Club Certificate of Excellence. Speaker at Config 2023 and AWE USA 2024.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="marquee" aria-hidden="true">
+  <div class="marquee-track">
+    <span class="marquee-item">Interfaces <em>with weight</em></span>
+    <span class="marquee-item">Motion <em>with intent</em></span>
+    <span class="marquee-item">Type <em>with breath</em></span>
+    <span class="marquee-item">Systems <em>with memory</em></span>
+    <span class="marquee-item">Interfaces <em>with weight</em></span>
+    <span class="marquee-item">Motion <em>with intent</em></span>
+    <span class="marquee-item">Type <em>with breath</em></span>
+    <span class="marquee-item">Systems <em>with memory</em></span>
+  </div>
+</div>
+
+<section id="work">
+  <div class="container">
+    <div class="section-label"><span class="num">02</span> Selected Work · 2022—2024</div>
+    <div class="work-list">
+      <a class="work-item" data-img="https://picsum.photos/seed/aurora-atlas/640/800.jpg">
+        <div class="work-num">01</div>
+        <div class="work-title">Aurora <em>Atlas</em></div>
+        <div class="work-tags">
+          <span class="work-tag">WebGL</span>
+          <span class="work-tag">Type System</span>
+          <span class="work-tag">Design Eng</span>
+        </div>
+        <div class="work-year">2024</div>
+      </a>
+      <a class="work-item" data-img="https://picsum.photos/seed/helion-state/640/800.jpg">
+        <div class="work-num">02</div>
+        <div class="work-title">Helion <em>State</em></div>
+        <div class="work-tags">
+          <span class="work-tag">Product</span>
+          <span class="work-tag">Motion System</span>
+          <span class="work-tag">React</span>
+        </div>
+        <div class="work-year">2024</div>
+      </a>
+      <a class="work-item" data-img="https://picsum.photos/seed/mira-console/640/800.jpg">
+        <div class="work-num">03</div>
+        <div class="work-title">Mira <em>Console</em></div>
+        <div class="work-tags">
+          <span class="work-tag">Dev Tools</span>
+          <span class="work-tag">Data Viz</span>
+          <span class="work-tag">CLI</span>
+        </div>
+        <div class="work-year">2023</div>
+      </a>
+      <a class="work-item" data-img="https://picsum.photos/seed/verdant-os/640/800.jpg">
+        <div class="work-num">04</div>
+        <div class="work-title">Verdant <em>OS</em></div>
+        <div class="work-tags">
+          <span class="work-tag">Climate Tech</span>
+          <span class="work-tag">Dashboard</span>
+          <span class="work-tag">3D</span>
+        </div>
+        <div class="work-year">2023</div>
+      </a>
+      <a class="work-item" data-img="https://picsum.photos/seed/sable-specimen/640/800.jpg">
+        <div class="work-num">05</div>
+        <div class="work-title">Sable <em>Specimen</em></div>
+        <div class="work-tags">
+          <span class="work-tag">Variable Type</span>
+          <span class="work-tag">Editorial</span>
+          <span class="work-tag">GF</span>
+        </div>
+        <div class="work-year">2022</div>
+      </a>
+      <a class="work-item" data-img="https://picsum.photos/seed/noct-lume/640/800.jpg">
+        <div class="work-num">06</div>
+        <div class="work-title">Noct <em>Lume</em></div>
+        <div class="work-tags">
+          <span class="work-tag">Installation</span>
+          <span class="work-tag">Shaders</span>
+          <span class="work-tag">Sound</span>
+        </div>
+        <div class="work-year">2022</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<section id="capabilities">
+  <div class="container">
+    <div class="section-label"><span class="num">03</span> Capabilities</div>
+    <div class="cap-grid">
+      <div class="cap-item reveal">
+        <div class="cap-num">i.</div>
+        <h3 class="cap-title">Interface <em>Engineering</em></h3>
+        <p class="cap-desc">Production-grade React, view transitions, design systems that survive contact with a 30-engineer team. I write the code that ships, not the code that demos.</p>
+        <div class="cap-tags">
+          <span class="cap-tag">React</span>
+          <span class="cap-tag">TypeScript</span>
+          <span class="cap-tag">Tailwind</span>
+          <span class="cap-tag">Radix</span>
+          <span class="cap-tag">Framer Motion</span>
+        </div>
+      </div>
+      <div class="cap-item reveal">
+        <div class="cap-num">ii.</div>
+        <h3 class="cap-title">Motion <em>Systems</em></h3>
+        <p class="cap-desc">Spring physics, scroll choreography, gesture-driven interfaces. Motion as communication — every transition carries meaning, none exists for its own sake.</p>
+        <div class="cap-tags">
+          <span class="cap-tag">GSAP</span>
+          <span class="cap-tag">Lenis</span>
+          <span class="cap-tag">View Transitions</span>
+          <span class="cap-tag">WAAPI</span>
+        </div>
+      </div>
+      <div class="cap-item reveal">
+        <div class="cap-num">iii.</div>
+        <h3 class="cap-title">Computational <em>Type</em></h3>
+        <p class="cap-desc">Variable font specimens, generative typography, custom OpenType features. Type that responds to context, time, and reader rather than sitting still on the page.</p>
+        <div class="cap-tags">
+          <span class="cap-tag">Variable Fonts</span>
+          <span class="cap-tag">HarfBuzz</span>
+          <span class="cap-tag">Glyphs</span>
+          <span class="cap-tag">Canvas</span>
+        </div>
+      </div>
+      <div class="cap-item reveal">
+        <div class="cap-num">iv.</div>
+        <h3 class="cap-title">Realtime <em>Graphics</em></h3>
+        <p class="cap-desc">WebGL, shaders, procedural geometry. When an interface needs to feel physical — light, weight, atmosphere — that's where I live. Performance-budget aware.</p>
+        <div class="cap-tags">
+          <span class="cap-tag">Three.js</span>
+          <span class="cap-tag">GLSL</span>
+          <span class="cap-tag">WebGPU</span>
+          <span class="cap-tag">Compute</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="recognition">
+  <div class="container">
+    <div class="section-label"><span class="num">04</span> Recognition</div>
+    <div class="recog-list">
+      <div class="recog-item">
+        <div class="recog-year">2024</div>
+        <div class="recog-title">Awwwards <em>Site of the Year</em> — Nominee</div>
+        <div class="recog-org">Aurora Atlas</div>
+        <div class="recog-cat">Site of the Day ×2</div>
+      </div>
+      <div class="recog-item">
+        <div class="recog-year">2024</div>
+        <div class="recog-title">Communication Arts <em>Interactive Annual</em></div>
+        <div class="recog-org">Helion State</div>
+        <div class="recog-cat">Featured</div>
+      </div>
+      <div class="recog-item">
+        <div class="recog-year">2024</div>
+        <div class="recog-title">FWA <em>of the Day</em></div>
+        <div class="recog-org">Mira Console</div>
+        <div class="recog-cat">×3 Awards</div>
+      </div>
+      <div class="recog-item">
+        <div class="recog-year">2023</div>
+        <div class="recog-title">Type Directors Club <em>Certificate of Excellence</em></div>
+        <div class="recog-org">Sable Specimen</div>
+        <div class="recog-cat">Typography</div>
+      </div>
+      <div class="recog-item">
+        <div class="recog-year">2023</div>
+        <div class="recog-title">CSS Design Awards <em>Best of</em></div>
+        <div class="recog-org">Verdant OS</div>
+        <div class="recog-cat">Innovation</div>
+      </div>
+      <div class="recog-item">
+        <div class="recog-year">2023</div>
+        <div class="recog-title">Config <em>Speaker</em> — "The Millimeter Web"</div>
+        <div class="recog-org">Figma</div>
+        <div class="recog-cat">Talk</div>
+      </div>
+      <div class="recog-item">
+        <div class="recog-year">2022</div>
+        <div class="recog-title">The Webby <em>Nominee</em> — Best Visual Design</div>
+        <div class="recog-org">Noct Lume</div>
+        <div class="recog-cat">Interactive</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="currently">
+  <div class="currently-grid">
+    <div class="currently-label">Currently</div>
+    <div class="currently-list">
+      <div class="currently-row">
+        <div class="currently-key">Reading</div>
+        <div class="currently-val">The Shape of a Pocket — <em>John Berger</em>; Patterns of Software — <em>Richard Gabriel</em></div>
+      </div>
+      <div class="currently-row">
+        <div class="currently-key">Building</div>
+        <div class="currently-val">A variable typeface drawn entirely in code; an essay on <em>interface weather</em></div>
+      </div>
+      <div class="currently-row">
+        <div class="currently-key">Listening</div>
+        <div class="currently-val">Ryuichi Sakamoto — <em>12</em>; Caterina Barbieri — <em>Myuthafoo</em></div>
+      </div>
+      <div class="currently-row">
+        <div class="currently-key">Based in</div>
+        <div class="currently-val">Brooklyn, NY — monthly in Tokyo, JP</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact">
+  <div class="contact-eyebrow">Begin a Project · 2025</div>
+  <h2 class="contact-title">
+    Let's make<br>
+    something <em>worth</em><br>
+    remembering.
+  </h2>
+  <a href="mailto:hello@vesperhalcyon.studio" class="contact-email">hello@vesperhalcyon.studio</a>
+</section>
+
+<footer>
+  <div class="footer-col">
+    <h5>Studio</h5>
+    <p>Independent practice of Vesper Halcyon. Design engineering, motion systems, computational typography. By appointment only.</p>
+  </div>
+  <div class="footer-col">
+    <h5>Elsewhere</h5>
+    <ul>
+      <li><a href="#">Are.na</a></li>
+      <li><a href="#">Read.cv</a></li>
+      <li><a href="#">GitHub</a></li>
+      <li><a href="#">Are.na / Radio</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h5>Contact</h5>
+    <ul>
+      <li><a href="mailto:hello@vesperhalcyon.studio">hello@vesperhalcyon.studio</a></li>
+      <li><a href="#">+1 347 555 0142</a></li>
+      <li>Brooklyn · Tokyo</li>
+    </ul>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025 Vesper Halcyon — All works selected, none omitted.</div>
+    <div class="clock" id="clock">Brooklyn — <span>--:--:--</span></div>
+  </div>
+</footer>
+
+<script>
+/* ============ Custom Cursor ============ */
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx = window.innerWidth/2, my = window.innerHeight/2;
+let rx = mx, ry = my;
+const isTouch = window.matchMedia('(max-width: 960px)').matches || 'ontouchstart' in window;
+
+if(!isTouch){
+  document.addEventListener('mousemove', e => {
+    mx = e.clientX; my = e.clientY;
+    cursor.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+  });
+  (function loop(){
+    rx += (mx - rx) * 0.18;
+    ry += (my - ry) * 0.18;
+    ring.style.transform = `translate(${rx}px, ${ry}px) translate(-50%, -50%)`;
+    requestAnimationFrame(loop);
+  })();
+  document.querySelectorAll('a, button, .work-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { cursor.classList.add('hover'); ring.classList.add('hover'); });
+    el.addEventListener('mouseleave', () => { cursor.classList.remove('hover'); ring.classList.remove('hover'); });
+  });
+}
+
+/* ============ Flow Field Canvas ============ */
+const canvas = document.getElementById('flowCanvas');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, dpr = Math.min(window.devicePixelRatio || 1, 2);
+let particles = [];
+let mouseField = { x: -9999, y: -9999 };
+let time = 0;
+
+function resize(){
+  const rect = canvas.getBoundingClientRect();
+  W = rect.width; H = rect.height;
+  canvas.width = W * dpr;
+  canvas.height = H * dpr;
+  ctx.scale(dpr, dpr);
+}
+resize();
+window.addEventListener('resize', () => { 
+  ctx.setTransform(1,0,0,1,0,0); 
+  resize(); 
+});
+
+function flowNoise(x, y, t){
+  return (
+    Math.sin(x * 0.0024 + t * 1.2) * 0.5 +
+    Math.cos(y * 0.0028 + t * 1.0) * 0.5 +
+    Math.sin((x + y) * 0.0019 + t * 0.7) * 0.35 +
+    Math.cos((x - y) * 0.0022 + t * 0.85) * 0.35
+  );
+}
+
+class Particle {
+  constructor(){ this.reset(true); }
+  reset(initial){
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.history = [];
+    this.life = 120 + Math.random() * 240;
+    this.maxLife = this.life;
+    this.shade = Math.random();
+    if(initial){ this.life = Math.random() * this.maxLife; }
+  }
+  update(t){
+    const n = flowNoise(this.x, this.y, t);
+    const angle = n * Math.PI * 2.2;
+    this.x += Math.cos(angle) * 1.3;
+    this.y += Math.sin(angle) * 1.3;
+    
+    // Mouse repulsion
+    const dx = this.x - mouseField.x;
+    const dy = this.y - mouseField.y;
+    const dist2 = dx*dx + dy*dy;
+    if(dist2 < 28000 && dist2 > 0.1){
+      const dist = Math.sqrt(dist2);
+      const force = (170 - dist) / 170;
+      this.x += (dx / dist) * force * 4.5;
+      this.y += (dy / dist) * force * 4.5;
+    }
+    
+    this.history.push(this.x, this.y);
+    if(this.history.length > 16) this.history.splice(0, 2);
+    
+    this.life--;
+    if(this.life <= 0 || this.x < -30 || this.x > W+30 || this.y < -30 || this.y > H+30){
+      this.reset(false);
+    }
+  }
+  draw(){
+    if(this.history.length < 4) return;
+    const lifeRatio = this.life / this.maxLife;
+    const alpha = Math.min(lifeRatio * 0.9, (1 - lifeRatio) * 2) * 0.55;
+    
+    // Color shift between amber and cream
+    const r = 217 + this.shade * 24;
+    const g = 164 + this.shade * 50;
+    const b = 65 + this.shade * 100;
+    
+    ctx.strokeStyle = `rgba(${r|0}, ${g|0}, ${b|0}, ${alpha})`;
+    ctx.lineWidth = 0.6 + this.shade * 0.4;
+    ctx.beginPath();
+    ctx.moveTo(this.history[0], this.history[1]);
+    for(let i = 2; i < this.history.length; i += 2){
+      ctx.lineTo(this.history[i], this.history[i+1]);
+    }
+    ctx.stroke();
+  }
+}
+
+function initParticles(){
+  particles = [];
+  const count = Math.min(420, Math.floor(W * H / 3200));
+  for(let i = 0; i < count; i++) particles.push(new Particle());
+}
+initParticles();
+window.addEventListener('resize', initParticles);
+
+canvas.addEventListener('mousemove', e => {
+  const rect = canvas.getBoundingClientRect();
+  mouseField.x = e.clientX - rect.left;
+  mouseField.y = e.clientY - rect.top;
+});
+canvas.addEventListener('mouseleave', () => { mouseField.x = -9999; mouseField.y = -9999; });
+
+function animate(){
+  // Fade trails
+  ctx.fillStyle = 'rgba(10, 9, 8, 0.06)';
+  ctx.fillRect(0, 0, W, H);
+  time += 0.0024;
+  for(let i = 0; i < particles.length; i++){
+    particles[i].update(time);
+    particles[i].draw();
+  }
+  requestAnimationFrame(animate);
+}
+animate();
+
+/* ============ Work Preview ============ */
+const preview = document.getElementById('workPreview');
+const previewImg = document.getElementById('previewImg');
+let previewVisible = false;
+
+document.querySelectorAll('.work-item').forEach(item => {
+  if(isTouch) return;
+  item.addEventListener('mouseenter', () => {
+    previewImg.src = item.dataset.img;
+    preview.classList.add('show');
+    previewVisible = true;
+  });
+  item.addEventListener('mouseleave', () => {
+    preview.classList.remove('show');
+    previewVisible = false;
+  });
+});
+if(!isTouch){
+  document.addEventListener('mousemove', e => {
+    if(previewVisible){
+      preview.style.left = e.clientX + 'px';
+      preview.style.top = e.clientY + 'px';
+    }
+  });
+}
+
+/* ============ Reveal on Scroll ============ */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach((entry, i) => {
+    if(entry.isIntersecting){
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* Auto-reveal work items and recognition with stagger */
+const workObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if(entry.isIntersecting){
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+      workObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.work-item, .recog-item, .cap-item').forEach((el, i) => {
+  if(!el.classList.contains('reveal')){
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = `opacity .9s cubic-bezier(.16,1,.3,1) ${i * 60}ms, transform .9s cubic-bezier(.16,1,.3,1) ${i * 60}ms, padding .6s cubic-bezier(.16,1,.3,1), background .3s`;
+    workObserver.observe(el);
+  }
+});
+
+/* ============ Clock ============ */
+function updateClock(){
+  try {
+    const now = new Date();
+    const opts = { hour12: false, timeZone: 'America/New_York', hour:'2-digit', minute:'2-digit', second:'2-digit' };
+    const t = now.toLocaleTimeString('en-US', opts);
+    const el = document.getElementById('clock');
+    if(el) el.innerHTML = `Brooklyn — <span>${t}</span>`;
+  } catch(e){
+    const now = new Date();
+    const t = now.toTimeString().slice(0,8);
+    const el = document.getElementById('clock');
+    if(el) el.innerHTML = `Brooklyn — <span>${t}</span>`;
+  }
+}
+updateClock();
+setInterval(updateClock, 1000);
+
+/* ============ Subtle hero parallax ============ */
+const heroTitle = document.querySelector('.hero-title');
+const heroContent = document.querySelector('.hero-content');
+if(!isTouch){
+  document.querySelector('.hero').addEventListener('mousemove', e => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const cx = (e.clientX - rect.left) / rect.width - 0.5;
+    const cy = (e.clientY - rect.top) / rect.height - 0.5;
+    heroContent.style.transform = `translate(${cx * -8}px, ${cy * -6}px)`;
+  });
+  document.querySelector('.hero').addEventListener('mouseleave', () => {
+    heroContent.style.transform = '';
+  });
+  heroContent.style.transition = 'transform .8s cubic-bezier(.16,1,.3,1)';
+}
+</script>
+</body>
+</html>
